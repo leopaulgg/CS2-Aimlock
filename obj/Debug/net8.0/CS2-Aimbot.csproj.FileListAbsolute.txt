@@ -1,0 +1,12 @@
+C:\Users\User\vscode\main\c#\aimbot\bin\Debug\net8.0\CS2-Aimbot.deps.json
+C:\Users\User\vscode\main\c#\aimbot\bin\Debug\net8.0\CS2-Aimbot.dll
+C:\Users\User\vscode\main\c#\aimbot\bin\Debug\net8.0\CS2-Aimbot.pdb
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.csproj.AssemblyReference.cache
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.AssemblyInfoInputs.cache
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.AssemblyInfo.cs
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.csproj.CoreCompileInputs.cache
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.dll
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\refint\CS2-Aimbot.dll
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.pdb
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\ref\CS2-Aimbot.dll

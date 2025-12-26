@@ -2560,9 +2560,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\vscode\\main\\c#\\aimbot\\aimbot.csproj",
-      "projectName": "aimbot",
-      "projectPath": "C:\\Users\\User\\vscode\\main\\c#\\aimbot\\aimbot.csproj",
+      "projectUniqueName": "C:\\Users\\User\\vscode\\main\\c#\\aimbot\\CS2-Aimbot.csproj",
+      "projectName": "CS2-Aimbot",
+      "projectPath": "C:\\Users\\User\\vscode\\main\\c#\\aimbot\\CS2-Aimbot.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\User\\vscode\\main\\c#\\aimbot\\obj\\",
       "projectStyle": "PackageReference",
