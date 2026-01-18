@@ -1,4 +1,4 @@
-```txt
+```json
 "List Keys": list of keys you can put in "Key For Aimlock" to enable aimbot
 "Key For Aimlock": that key that enables aimlock
 "Authorized Player1 (SteamID64)": authorized player that has aimlock
