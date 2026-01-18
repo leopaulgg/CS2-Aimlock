@@ -11,6 +11,9 @@ using System.Threading.Channels;
 using Microsoft.VisualBasic;
 using System.Data;
 using System.Runtime.Versioning;
+using System.Runtime.InteropServices;
+using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+using CounterStrikeSharp.API.Modules.Commands.Targeting;
 
 namespace Aimbot
 {
@@ -22,7 +25,7 @@ namespace Aimbot
 
         private Config config = new();
         // private readonly ConcurrentDictionary<ulong, PlayerInfo> players = new();
-
+        // public MemoryFunctionVoid<CBasePlayerPawn, QAngle> SnapViewAngles = new(GameData.GetSignature("SnapViewAnglesSignature"));
         public override void Load(bool hotReload)
         {
             LoadConfig();
@@ -30,6 +33,7 @@ namespace Aimbot
             // RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect, HookMode.Post);
             AddTimer(config.Interval, OnTick, TimerFlags.REPEAT);
             //         BANNER displayed on the console on Load()
+
             Console.WriteLine("\n $$$$$$\\  $$\\               $$$$$$$\\             $$\\     \n$$  __$$\\ \\__|              $$  __$$\\            $$ |    \n$$ /  $$ |$$\\ $$$$$$\\$$$$\\  $$ |  $$ | $$$$$$\\ $$$$$$\\   \n$$$$$$$$ |$$ |$$  _$$  _$$\\ $$$$$$$\\ |$$  __$$\\\\_$$  _|  \n$$  __$$ |$$ |$$ / $$ / $$ |$$  __$$\\ $$ /  $$ | $$ |    \n$$ |  $$ |$$ |$$ | $$ | $$ |$$ |  $$ |$$ |  $$ | $$ |$$\\ \n$$ |  $$ |$$ |$$ | $$ | $$ |$$$$$$$  |\\$$$$$$  | \\$$$$  |\n\\__|  \\__|\\__|\\__| \\__| \\__|\\_______/  \\______/   \\____/ \n                                                         \n                                                         \n                                                         ");
         }
         // private void Unload()
@@ -100,6 +104,11 @@ namespace Aimbot
             else if (config.KeyLock == "Attack3") return PlayerButtons.Attack3;
             else if (config.KeyLock == "Scoreboard") return PlayerButtons.Scoreboard;
             else if (config.KeyLock == "Inspect") return PlayerButtons.Inspect;
+            // else
+            // {
+            //     Console.WriteLine($"!!! Setting \"Key For Aimbot\" (= {config.KeyLock}) not recognized");
+            //     return PlayerButtons.Attack;
+            // }
             else { throw new ArgumentException($"Setting \"Key For Aimbot\" (= {config.KeyLock}) not recognized"); }
         }
 
@@ -111,6 +120,25 @@ namespace Aimbot
         {
             player.PrintToConsole(Message);
         }
+        private static void hud(CCSPlayerController player, string Message)
+        {
+            player.PrintToCenter(Message);
+        }
+        private static void html(CCSPlayerController player, string Message)
+        {
+            player.PrintToCenterHtml(Message);
+        }
+        private static bool NullCheck(IEnumerable<CCSPlayerController> Players)
+        {
+            foreach (CCSPlayerController player in Players)
+            {
+                if (player?.PlayerPawn?.Value?.CBodyComponent == null) return true;
+                if (player?.Pawn?.Value?.CBodyComponent == null) return true;
+                if (player?.CBodyComponent == null) return true;
+                else return false;
+            }
+            return false;
+        }
         private static IEnumerable<CCSPlayerController> Players()
         {
             return Utilities.GetPlayers().Where(p => p.IsValid && !p.IsBot && p.PlayerPawn.Value != null);
@@ -120,67 +148,188 @@ namespace Aimbot
             return Utilities.GetPlayers().Where(p => p.IsValid && p.PlayerPawn.Value != null);
         }
 
-        private static double Distance(CCSPlayerController player1, CCSPlayerController player2)
+        private static float Distance(CCSPlayerController player1, CCSPlayerController player2)
         {
-            return Math.Sqrt(
+            return (float)Math.Sqrt(
                 (player1.Pawn.Value!.AbsOrigin!.X - player2.Pawn.Value!.AbsOrigin!.X) * (player1.Pawn.Value.AbsOrigin.X - player2.Pawn.Value.AbsOrigin.X) +
                 (player1.Pawn.Value.AbsOrigin.Y - player2.Pawn.Value.AbsOrigin.Y) * (player1.Pawn.Value.AbsOrigin.Y - player2.Pawn.Value.AbsOrigin.Y) +
                 (player1.Pawn.Value.AbsOrigin.X - player2.Pawn.Value.AbsOrigin.Z) * (player1.Pawn.Value.AbsOrigin.X - player2.Pawn.Value.AbsOrigin.Z)
             );
         }
+        private float vAngleScalarTarget(CCSPlayerController player1, CCSPlayerController player2, bool Degrees = true, byte Type = 1)
+        {
+            Vector P1ToP2 = new(
+                player2.PlayerPawn.Value!.AbsOrigin!.X - player1.PlayerPawn.Value!.AbsOrigin!.X,
+                player2.PlayerPawn.Value!.AbsOrigin!.Y - player1.PlayerPawn.Value!.AbsOrigin!.Y,
+                player2.PlayerPawn.Value!.AbsOrigin!.Z - player1.PlayerPawn.Value!.AbsOrigin!.Z
+            );
+            Vector eyes = new(
+                (float)(Math.Cos(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.Y) * Math.Cos(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.X)),
+                (float)(Math.Sin(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.Y) * Math.Cos(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.X)),
+                (float)-Math.Sin(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.X)
+            );
+            if (Type == 0)
+            {
+                return ((float)(
+                    (player2.PlayerPawn.Value!.AbsOrigin!.X - player1.PlayerPawn.Value!.AbsOrigin!.X)
+                    *
+                    (Math.Cos(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.Y) * Math.Cos(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.X))
+                    +
+                    (player2.PlayerPawn.Value!.AbsOrigin!.Y - player1.PlayerPawn.Value!.AbsOrigin!.Y)
+                    *
+                    (Math.Sin(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.Y) * Math.Cos(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.X))
+                    +
+                    (player2.PlayerPawn.Value!.AbsOrigin!.Z - player1.PlayerPawn.Value!.AbsOrigin!.Z)
+                    *
+                    -Math.Sin(0.017453292519 * player1.PlayerPawn.Value.EyeAngles.X))
+                );
+            }
+            if (Type == 1)
+            {
+                if (Degrees)
+                {
+                    return (float)((
+                        Math.Acos((eyes.X * P1ToP2.X + eyes.Y * P1ToP2.Y + eyes.Z * P1ToP2.Z) / Math.Sqrt((eyes.X * eyes.X + eyes.Y * eyes.Y + eyes.Z * eyes.Z) * (P1ToP2.X * P1ToP2.X + P1ToP2.Y * P1ToP2.Y + P1ToP2.Z * P1ToP2.Z)))
+                    ) * 57.295779513082);
+                }
+                else if (!Degrees)
+                {
+                    return (float)(
+                        Math.Acos((eyes.X * P1ToP2.X + eyes.Y * P1ToP2.Y + eyes.Z * P1ToP2.Z) / Math.Sqrt((eyes.X * eyes.X + eyes.Y * eyes.Y + eyes.Z * eyes.Z) * (P1ToP2.X * P1ToP2.X + P1ToP2.Y * P1ToP2.Y + P1ToP2.Z * P1ToP2.Z)))
+                    );
+                }
+                else throw new ArgumentException();
+            }
+            else throw new ArgumentException("parameter \"mode\" from vAngleScalarTarget out of range (valid values: 0, 1)");
+        }
+
+        static Dictionary<ulong, bool> toggled = new()
+        {
+            {76561199461992993UL, true}
+        };
+
+        private static bool Toggled(CCSPlayerController player)
+        {
+            log(player, $"toggled[steamID]{toggled[player.SteamID]}");
+            log(player, $"toggled.TryGetValue(steamID, out bool value)({toggled.TryGetValue(player.SteamID, out bool value2)})\ntoggled({toggled})");
+            ulong id = player.SteamID;
+            if (toggled.ContainsKey(id))
+            {
+                toggled[id] = !toggled[id];
+                log(player, $"if containskey : toggled[steamID]({toggled[player.SteamID]})");
+                return toggled[id];
+            }
+            else
+            {
+                toggled.Add(id, true);
+                log(player, $"toggle.Add({toggled[id]})");
+                log(player, $"if not contains key : toggle[steamID]({toggled[player.SteamID]})");
+                return true;
+            }
+        }
         private void OnTick()
         {
             foreach (var player in Players())
             {
-                ulong[] Allowed = [
-                    config.AllowedUsers,
-                    config.AllowedUsers2
-                ];
-                foreach (ulong SteamID in Allowed)
+                if (NullCheck([player])) continue;
+                if (!config.AllowedForAll)
                 {
-                    if (player.SteamID != SteamID) continue;
+                    ulong[] Allowed = [
+                        config.AllowedUsers,
+                        config.AllowedUsers2
+                    ];
+                    foreach (ulong SteamID in Allowed)
+                    {
+                        if (player.SteamID != SteamID) continue;
+                    }
                 }
-
                 System.Enum button = ButtonFinder();
                 bool @lock = player.Buttons.HasFlag(button);
-                if (@lock)
+                ulong id = player.SteamID;
+
+                // Aimlock Logic
+                if (config.AimlockToggle)
                 {
-                    FindClosestPlayer(player, config.CanAimAtTeammates, config.CanAimAtDead);
+                    log(player, $"toggled[player.SteamID]({toggled[id]})");
+                    if (@lock && Toggled(player))
+                    {
+                        log(player, $"Entered if (@lock && Toggled(player))");
+                        Redir(player);
+                    }
+                    if (Toggled(player))
+                    {
+                        log(player, $"Entered else if");
+                        Redir(player);
+                    }
+                }
+                if (!config.AimlockToggle)
+                {
+                    if (@lock)
+                    {
+                        Redir(player);
+                    }
                 }
             }
         }
-        private static void FindClosestPlayer(CCSPlayerController Player, bool EnemyOnly, bool AliveOnly)
+
+        private int i = 0;
+        private void VectorClosest(CCSPlayerController player)
         {
-            CCSPlayerController? TragetedPlayer = null;
+            if (NullCheck([player])) return;
+            CCSPlayerController? TargetedPlayer = null;
+            float closest = float.MaxValue;
+
+            foreach (CCSPlayerController other in PlayersAndBots())
+            {
+                if (NullCheck([other])) continue;
+                if (other == player) continue;
+                if (other.Team == player.Team && !config.CanAimAtTeammates) continue;
+                if (!other.PawnIsAlive && !config.CanAimAtDead) continue;
+                float vec = vAngleScalarTarget(player, other);
+                if (vAngleScalarTarget(player, other) < closest)
+                {
+                    TargetedPlayer = other;
+                    closest = (float)vAngleScalarTarget(player, other);
+                    html(player, $"§{i} {Math.Round(vec)}° {other.PlayerName}");
+                    i += 1;
+                }
+            }
+            if (TargetedPlayer?.Pawn?.Value?.CBodyComponent == null) { return; }
+            ApplyAimbot(player, TargetedPlayer!);
+        }
+        private void Redir(CCSPlayerController player)
+        {
+            if (config.ProduitScalaire) VectorClosest(player);
+            if (!config.ProduitScalaire) FindClosestPlayer(player);
+        }
+        private void FindClosestPlayer(CCSPlayerController player)
+        {
+            CCSPlayerController? TargetedPlayer = null;
             float closestDistance = float.MaxValue;
 
-            if (Player.Pawn?.Value?.CBodyComponent == null) return;
             foreach (var other in PlayersAndBots())
             {
-                if (other == null || other == Player) continue;
-                if (other.Team == Player.Team && !EnemyOnly) continue;
-                if (!other.PawnIsAlive && !AliveOnly) continue;
-                var dist = Distance(Player, other);
+                if (NullCheck([other])) continue;
+                if (other == player) continue;
+                if (other.Team == player.Team && !config.CanAimAtTeammates) continue;
+                if (!other.PawnIsAlive && !config.CanAimAtDead) continue;
+                var dist = Distance(player, other);
                 if (dist < closestDistance)
                 {
                     closestDistance = (float)dist;
-                    TragetedPlayer = other;
+                    TargetedPlayer = other;
                 }
             }
-            if (Player == null || TragetedPlayer == null) return;
-            ApplyAimbot(Player, TragetedPlayer);
+            ApplyAimbot(player, TargetedPlayer!);
         }
         private static void ApplyAimbot(CCSPlayerController player, CCSPlayerController TargetedPlayer)
         {
-            if (TargetedPlayer?.Pawn?.Value?.AbsOrigin?.X == null) return;
-            if (player?.Pawn?.Value?.AbsOrigin?.X == null) return;
-
+            if (NullCheck([player])) return;
             // Direction from me -> enemy
-            var dx = TargetedPlayer.Pawn.Value.AbsOrigin.X - player.Pawn.Value.AbsOrigin.X;
+            var dx = TargetedPlayer.Pawn.Value!.AbsOrigin!.X - player.Pawn.Value!.AbsOrigin!.X;
             var dy = TargetedPlayer.Pawn.Value.AbsOrigin.Y - player.Pawn.Value.AbsOrigin.Y;
-            var dz = TargetedPlayer.Pawn.Value.AbsOrigin.Z - player.Pawn.Value.AbsOrigin.Z;
-
-            var move = TargetedPlayer.Pawn.Value.MovementServices as CCSPlayer_MovementServices;
+            var dz = TargetedPlayer.Pawn.Value.AbsOrigin.Z - 19 * GetDuckAmount(TargetedPlayer)
+                   - player.Pawn.Value.AbsOrigin.Z + 19 * GetDuckAmount(player);
 
             // Convert to angles (radians → degrees)
             float yawAngle = MathF.Atan2(dy, dx) * (180f / MathF.PI);
@@ -188,18 +337,26 @@ namespace Aimbot
             // Normalize if needed
             yawAngle %= 360;
 
+            var pawn = player.Pawn.Value;
+            QAngle angle = new(pitchAngle, yawAngle, 0);
+            // log(player, $"pawn({pawn}) angle({angle})");
+            // SnapViewAngles.Invoke(pawn, angle);
             player.Pawn.Value.Teleport(
-                null,
-                new QAngle(pitchAngle, yawAngle, 0),
-                null
+                new Vector(pawn!.AbsOrigin!.X, pawn.AbsOrigin.Y, pawn.AbsOrigin.Z),
+                new QAngle(angle.X, angle.Y, 0),
+                new Vector(pawn.AbsVelocity.X, pawn.AbsVelocity.Y, pawn.AbsVelocity.Z)
             );
         }
+        static float GetDuckAmount(CCSPlayerController player)
+        {
+            if (NullCheck([player])) return -1;
 
-        // private class PlayerInfo
-        // {
-        //     public ulong SteamID { get; set; }
-        //     public bool Authorized { get; set; }
-        // }
+            var move = player.Pawn!.Value!.MovementServices?.As<CCSPlayer_MovementServices>();
+            if (move == null)
+                return -1;
+
+            return move.DuckAmount;
+        }
 
         private class Config
         {
@@ -207,26 +364,34 @@ namespace Aimbot
             [JsonPropertyName("List Keys")]
             public string Comment { get; set; } = "Attack, Jump, Duck, Forward, Back, Use, Cancel, Left, Right, Moveleft, Moveright, Attack2, Run, Reload, Alt1, Alt2, Speed, Walk, Zoom, Weapon1, Weapon2, Bullrush, Grenade1, Grenade2, Attack3, Scoreboard, Inspect";
             [JsonPropertyName("Key For Aimlock")]
-            public string KeyLock { get; set; } = "Inspect";
+            public string KeyLock { get; set; } = "Attack3";
 
-            [JsonPropertyName("Authorized Player1 (Steam ID)")]
+            [JsonPropertyName("Authorized Player1 (SteamID64)")]
             public ulong AllowedUsers { get; set; } = 76561199461992993;
-            
-            [JsonPropertyName("Authorized Player2 (Steam ID)")]
-            public ulong AllowedUsers2 { get; set; } = 76561199053046240;
+
+            [JsonPropertyName("Authorized Player2 (SteamID64)")]
+            public ulong AllowedUsers2 { get; set; } = 76561198901321987;
+
+            [JsonPropertyName("Allowed For All Player")]
+            public bool AllowedForAll { get; set; } = true;
+
+            [JsonPropertyName("Finding Closest Player By Eye Angle")]
+            public bool ProduitScalaire { get; set; } = true;
+
+            [JsonPropertyName("Aimlock Toggle")]
+            public bool AimlockToggle { get; set; } = false;
 
             [JsonPropertyName("Can Aim At Teammates Too (If false Only Aims At Enemies)")]
-            public bool CanAimAtTeammates {get; set;} = false;
+            public bool CanAimAtTeammates { get; set; } = false;
 
             [JsonPropertyName("Can Aim At Dead Players Too (If false Only Aims At Alive Players)")]
-            public bool CanAimAtDead {get; set;} = false;
+            public bool CanAimAtDead { get; set; } = false;
 
             [JsonPropertyName("Interval In Seconds")]
-            public float Interval { get; set; } = 0.015f; // 64 tps: 0.015625 ; 128 tps: 0.0078125
-        }
-        private class Authorized(ulong SteamID)
-        {
-            private ulong AllowedUsers { get; set; } = SteamID;
+            public float Interval { get; set; } = 0.00004f; // Recommended: 0.00002f 64 tps: 0.015625f ; 128 tps: 0.0078125f
+
+            // [JsonPropertyName("SnapViewAnglesSignature (Do not touch)")]
+            // public string CameraAngleSignature { get; set; } = "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 89 FB 48 89 F7 48 81 EC ? ? ? ? E8 ? ? ? ? 48 8B 93 ? ? ? ? 48 89 DF F3 0F";
         }
     }
 }
