@@ -31,7 +31,7 @@ namespace Aimbot
             LoadConfig();
             // RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect, HookMode.Post);
             // RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect, HookMode.Post);
-            AddTimer(config.Interval, OnTick, TimerFlags.REPEAT);
+            AddTimer(1/config.Interval, OnTick, TimerFlags.REPEAT);
             //         BANNER displayed on the console on Load()
 
             Console.WriteLine("\n $$$$$$\\  $$\\               $$$$$$$\\             $$\\     \n$$  __$$\\ \\__|              $$  __$$\\            $$ |    \n$$ /  $$ |$$\\ $$$$$$\\$$$$\\  $$ |  $$ | $$$$$$\\ $$$$$$\\   \n$$$$$$$$ |$$ |$$  _$$  _$$\\ $$$$$$$\\ |$$  __$$\\\\_$$  _|  \n$$  __$$ |$$ |$$ / $$ / $$ |$$  __$$\\ $$ /  $$ | $$ |    \n$$ |  $$ |$$ |$$ | $$ | $$ |$$ |  $$ |$$ |  $$ | $$ |$$\\ \n$$ |  $$ |$$ |$$ | $$ | $$ |$$$$$$$  |\\$$$$$$  | \\$$$$  |\n\\__|  \\__|\\__|\\__| \\__| \\__|\\_______/  \\______/   \\____/ \n                                                         \n                                                         \n                                                         ");
@@ -364,7 +364,7 @@ namespace Aimbot
             [JsonPropertyName("List Keys")]
             public string Comment { get; set; } = "Attack, Jump, Duck, Forward, Back, Use, Cancel, Left, Right, Moveleft, Moveright, Attack2, Run, Reload, Alt1, Alt2, Speed, Walk, Zoom, Weapon1, Weapon2, Bullrush, Grenade1, Grenade2, Attack3, Scoreboard, Inspect";
             [JsonPropertyName("Key For Aimlock")]
-            public string KeyLock { get; set; } = "Attack3";
+            public string KeyLock { get; set; } = "Inspect";
 
             [JsonPropertyName("Authorized Player1 (SteamID64)")]
             public ulong AllowedUsers { get; set; } = 76561199461992993;
@@ -387,8 +387,8 @@ namespace Aimbot
             [JsonPropertyName("Can Aim At Dead Players Too (If false Only Aims At Alive Players)")]
             public bool CanAimAtDead { get; set; } = false;
 
-            [JsonPropertyName("Interval In Seconds")]
-            public float Interval { get; set; } = 0.00004f; // Recommended: 0.00002f 64 tps: 0.015625f ; 128 tps: 0.0078125f
+            [JsonPropertyName("Plugin Tickrate")]
+            public float Interval { get; set; } = 25000f; // Recommended: 0.00002f 64 tps: 0.015625f ; 128 tps: 0.0078125f
 
             // [JsonPropertyName("SnapViewAnglesSignature (Do not touch)")]
             // public string CameraAngleSignature { get; set; } = "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 89 FB 48 89 F7 48 81 EC ? ? ? ? E8 ? ? ? ? 48 8B 93 ? ? ? ? 48 89 DF F3 0F";
