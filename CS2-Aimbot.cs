@@ -104,11 +104,6 @@ namespace Aimbot
             else if (config.KeyLock == "Attack3") return PlayerButtons.Attack3;
             else if (config.KeyLock == "Scoreboard") return PlayerButtons.Scoreboard;
             else if (config.KeyLock == "Inspect") return PlayerButtons.Inspect;
-            // else
-            // {
-            //     Console.WriteLine($"!!! Setting \"Key For Aimbot\" (= {config.KeyLock}) not recognized");
-            //     return PlayerButtons.Attack;
-            // }
             else { throw new ArgumentException($"Setting \"Key For Aimbot\" (= {config.KeyLock}) not recognized"); }
         }
 
@@ -234,14 +229,8 @@ namespace Aimbot
                 if (NullCheck([player])) continue;
                 if (!config.AllowedForAll)
                 {
-                    ulong[] Allowed = [
-                        config.AllowedUsers,
-                        config.AllowedUsers2
-                    ];
-                    foreach (ulong SteamID in Allowed)
-                    {
-                        if (player.SteamID != SteamID) continue;
-                    }
+                        if (player.SteamID != config.AllowedUsers) continue;
+                        if (player.SteamID != config.AllowedUsers2) continue;
                 }
                 System.Enum button = ButtonFinder();
                 bool @lock = player.Buttons.HasFlag(button);

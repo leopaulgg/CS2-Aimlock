@@ -10,3 +10,4 @@ C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.dll
 C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\refint\CS2-Aimbot.dll
 C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.pdb
 C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\ref\CS2-Aimbot.dll
+C:\Users\User\vscode\main\c#\aimbot\obj\Debug\net8.0\CS2-Aimbot.sourcelink.json
