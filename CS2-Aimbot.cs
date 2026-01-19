@@ -31,7 +31,7 @@ namespace Aimbot
             LoadConfig();
             // RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect, HookMode.Post);
             // RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect, HookMode.Post);
-            AddTimer(1/config.Interval, OnTick, TimerFlags.REPEAT);
+            AddTimer(1 / config.Interval, OnTick, TimerFlags.REPEAT);
             //         BANNER displayed on the console on Load()
 
             Console.WriteLine("\n $$$$$$\\  $$\\               $$$$$$$\\             $$\\     \n$$  __$$\\ \\__|              $$  __$$\\            $$ |    \n$$ /  $$ |$$\\ $$$$$$\\$$$$\\  $$ |  $$ | $$$$$$\\ $$$$$$\\   \n$$$$$$$$ |$$ |$$  _$$  _$$\\ $$$$$$$\\ |$$  __$$\\\\_$$  _|  \n$$  __$$ |$$ |$$ / $$ / $$ |$$  __$$\\ $$ /  $$ | $$ |    \n$$ |  $$ |$$ |$$ | $$ | $$ |$$ |  $$ |$$ |  $$ | $$ |$$\\ \n$$ |  $$ |$$ |$$ | $$ | $$ |$$$$$$$  |\\$$$$$$  | \\$$$$  |\n\\__|  \\__|\\__|\\__| \\__| \\__|\\_______/  \\______/   \\____/ \n                                                         \n                                                         \n                                                         ");
@@ -127,10 +127,10 @@ namespace Aimbot
         {
             foreach (CCSPlayerController player in Players)
             {
-                if (player?.PlayerPawn?.Value?.CBodyComponent == null) return true;
-                if (player?.Pawn?.Value?.CBodyComponent == null) return true;
-                if (player?.CBodyComponent == null) return true;
-                else return false;
+                if (player?.PlayerPawn?.Value?.CBodyComponent == null
+                || player?.Pawn?.Value?.CBodyComponent == null
+                || player?.CBodyComponent == null)
+                    return true;
             }
             return false;
         }
@@ -227,31 +227,29 @@ namespace Aimbot
             foreach (var player in Players())
             {
                 if (NullCheck([player])) continue;
-                if (!config.AllowedForAll)
+                if (config.AllowedForAll == false)
                 {
-                        if (player.SteamID != config.AllowedUsers) continue;
-                        if (player.SteamID != config.AllowedUsers2) continue;
+                    if (player.SteamID != config.AllowedUsers
+                    && player.SteamID != config.AllowedUsers2)
+                        continue;
                 }
                 System.Enum button = ButtonFinder();
                 bool @lock = player.Buttons.HasFlag(button);
                 ulong id = player.SteamID;
 
                 // Aimlock Logic
-                if (config.AimlockToggle)
-                {
-                    log(player, $"toggled[player.SteamID]({toggled[id]})");
-                    if (@lock && Toggled(player))
-                    {
-                        log(player, $"Entered if (@lock && Toggled(player))");
-                        Redir(player);
-                    }
-                    if (Toggled(player))
-                    {
-                        log(player, $"Entered else if");
-                        Redir(player);
-                    }
-                }
-                if (!config.AimlockToggle)
+                // if (config.AimlockToggle)
+                // {
+                //     if (@lock && Toggled(player))
+                //     {
+                //         Redir(player);
+                //     }
+                //     if (Toggled(player))
+                //     {
+                //         Redir(player);
+                //     }
+                // }
+                // else
                 {
                     if (@lock)
                     {
@@ -259,6 +257,11 @@ namespace Aimbot
                     }
                 }
             }
+        }
+        private void Redir(CCSPlayerController player)
+        {
+            if (config.ProduitScalaire == true) VectorClosest(player);
+            if (config.ProduitScalaire == false) FindClosestPlayer(player);
         }
 
         private int i = 0;
@@ -274,22 +277,16 @@ namespace Aimbot
                 if (other == player) continue;
                 if (other.Team == player.Team && !config.CanAimAtTeammates) continue;
                 if (!other.PawnIsAlive && !config.CanAimAtDead) continue;
-                float vec = vAngleScalarTarget(player, other);
+                float angle = vAngleScalarTarget(player, other);
                 if (vAngleScalarTarget(player, other) < closest)
                 {
                     TargetedPlayer = other;
                     closest = (float)vAngleScalarTarget(player, other);
-                    html(player, $"§{i} {Math.Round(vec)}° {other.PlayerName}");
                     i += 1;
                 }
             }
             if (TargetedPlayer?.Pawn?.Value?.CBodyComponent == null) { return; }
             ApplyAimbot(player, TargetedPlayer!);
-        }
-        private void Redir(CCSPlayerController player)
-        {
-            if (config.ProduitScalaire) VectorClosest(player);
-            if (!config.ProduitScalaire) FindClosestPlayer(player);
         }
         private void FindClosestPlayer(CCSPlayerController player)
         {
@@ -305,10 +302,11 @@ namespace Aimbot
                 var dist = Distance(player, other);
                 if (dist < closestDistance)
                 {
-                    closestDistance = (float)dist;
+                    closestDistance = dist;
                     TargetedPlayer = other;
                 }
             }
+            if (NullCheck([TargetedPlayer!])) return;
             ApplyAimbot(player, TargetedPlayer!);
         }
         private static void ApplyAimbot(CCSPlayerController player, CCSPlayerController TargetedPlayer)
@@ -359,16 +357,16 @@ namespace Aimbot
             public ulong AllowedUsers { get; set; } = 76561199461992993;
 
             [JsonPropertyName("Authorized Player2 (SteamID64)")]
-            public ulong AllowedUsers2 { get; set; } = 76561198901321987;
+            public ulong AllowedUsers2 { get; set; } = 0;
 
-            [JsonPropertyName("Allowed For All Player")]
-            public bool AllowedForAll { get; set; } = true;
+            [JsonPropertyName("Allowed For All Players")]
+            public bool AllowedForAll { get; set; } = false;
 
             [JsonPropertyName("Finding Closest Player By Eye Angle")]
             public bool ProduitScalaire { get; set; } = true;
 
-            [JsonPropertyName("Aimlock Toggle")]
-            public bool AimlockToggle { get; set; } = false;
+            // [JsonPropertyName("Aimlock Toggle")]
+            // public bool AimlockToggle { get; set; } = false;
 
             [JsonPropertyName("Can Aim At Teammates Too (If false Only Aims At Enemies)")]
             public bool CanAimAtTeammates { get; set; } = false;
