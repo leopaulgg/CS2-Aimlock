@@ -22,7 +22,8 @@ namespace Aimbot
         public override string ModuleAuthor => "leopaulgg";
         public override string ModuleName => "CS2-Aimbot";
         public override string ModuleVersion => "1.0";
-
+        
+        private static readonly MemoryFunctionVoid<CBasePlayerPawn, QAngle> SnapViewAngles = new(GameData.GetSignature("CCSBot_SnapViewAngles"));
         private Config config = new();
         // private readonly ConcurrentDictionary<ulong, PlayerInfo> players = new();
         // public MemoryFunctionVoid<CBasePlayerPawn, QAngle> SnapViewAngles = new(GameData.GetSignature("SnapViewAnglesSignature"));
@@ -195,9 +196,16 @@ namespace Aimbot
                 }
                 else throw new ArgumentException();
             }
-            else throw new ArgumentException("parameter \"mode\" from vAngleScalarTarget out of range (valid values: 0, 1)");
+            else throw new ArgumentException("Parameter \"mode\" from vAngleScalarTarget out of range (valid values: 0, 1)");
         }
 
+        private bool AuthorizedCheck(CCSPlayerController player)
+        {
+            if (player.SteamID == config.AllowedUsers
+            || player.SteamID == config.AllowedUsers2)
+                return true;
+            else return false;
+        }
         static Dictionary<ulong, bool> toggled = new()
         {
             {76561199461992993UL, true}
@@ -227,12 +235,12 @@ namespace Aimbot
             foreach (var player in Players())
             {
                 if (NullCheck([player])) continue;
+
                 if (config.AllowedForAll == false)
                 {
-                    if (player.SteamID != config.AllowedUsers
-                    && player.SteamID != config.AllowedUsers2)
-                        continue;
+                    if (!AuthorizedCheck(player)) continue;
                 }
+
                 System.Enum button = ButtonFinder();
                 bool @lock = player.Buttons.HasFlag(button);
                 ulong id = player.SteamID;
@@ -260,6 +268,7 @@ namespace Aimbot
         }
         private void Redir(CCSPlayerController player)
         {
+            if (!AuthorizedCheck(player)) return;
             if (config.ProduitScalaire == true) VectorClosest(player);
             if (config.ProduitScalaire == false) FindClosestPlayer(player);
         }
@@ -268,6 +277,7 @@ namespace Aimbot
         private void VectorClosest(CCSPlayerController player)
         {
             if (NullCheck([player])) return;
+            if (!AuthorizedCheck(player)) return;
             CCSPlayerController? TargetedPlayer = null;
             float closest = float.MaxValue;
 
@@ -290,6 +300,7 @@ namespace Aimbot
         }
         private void FindClosestPlayer(CCSPlayerController player)
         {
+            if (!AuthorizedCheck(player)) return;
             CCSPlayerController? TargetedPlayer = null;
             float closestDistance = float.MaxValue;
 
@@ -309,8 +320,9 @@ namespace Aimbot
             if (NullCheck([TargetedPlayer!])) return;
             ApplyAimbot(player, TargetedPlayer!);
         }
-        private static void ApplyAimbot(CCSPlayerController player, CCSPlayerController TargetedPlayer)
+        private void ApplyAimbot(CCSPlayerController player, CCSPlayerController TargetedPlayer, byte type = 1)
         {
+            if (!AuthorizedCheck(player)) return;
             if (NullCheck([player])) return;
             // Direction from me -> enemy
             var dx = TargetedPlayer.Pawn.Value!.AbsOrigin!.X - player.Pawn.Value!.AbsOrigin!.X;
@@ -328,11 +340,14 @@ namespace Aimbot
             QAngle angle = new(pitchAngle, yawAngle, 0);
             // log(player, $"pawn({pawn}) angle({angle})");
             // SnapViewAngles.Invoke(pawn, angle);
-            player.Pawn.Value.Teleport(
-                new Vector(pawn!.AbsOrigin!.X, pawn.AbsOrigin.Y, pawn.AbsOrigin.Z),
-                new QAngle(angle.X, angle.Y, 0),
-                new Vector(pawn.AbsVelocity.X, pawn.AbsVelocity.Y, pawn.AbsVelocity.Z)
-            );
+            if (type == 0)
+                player.Pawn.Value.Teleport(
+                    new Vector(pawn!.AbsOrigin!.X, pawn.AbsOrigin.Y, pawn.AbsOrigin.Z),
+                    new QAngle(angle.X, angle.Y, 0),
+                    new Vector(pawn.AbsVelocity.X, pawn.AbsVelocity.Y, pawn.AbsVelocity.Z)
+                );
+            if (type == 1)
+                SnapViewAngles.Invoke(player.PlayerPawn.Value!, angle);
         }
         static float GetDuckAmount(CCSPlayerController player)
         {
