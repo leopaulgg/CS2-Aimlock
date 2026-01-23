@@ -235,11 +235,7 @@ namespace Aimbot
             foreach (var player in Players())
             {
                 if (NullCheck([player])) continue;
-
-                if (config.AllowedForAll == false)
-                {
-                    if (!AuthorizedCheck(player)) continue;
-                }
+                if (!AuthorizedCheck(player) && !config.AllowedForAll) continue;
 
                 System.Enum button = ButtonFinder();
                 bool @lock = player.Buttons.HasFlag(button);
@@ -268,7 +264,7 @@ namespace Aimbot
         }
         private void Redir(CCSPlayerController player)
         {
-            if (!AuthorizedCheck(player)) return;
+            if (!AuthorizedCheck(player) && !config.AllowedForAll) return;
             if (config.ProduitScalaire == true) VectorClosest(player);
             if (config.ProduitScalaire == false) FindClosestPlayer(player);
         }
@@ -277,7 +273,7 @@ namespace Aimbot
         private void VectorClosest(CCSPlayerController player)
         {
             if (NullCheck([player])) return;
-            if (!AuthorizedCheck(player)) return;
+            if (!AuthorizedCheck(player) && !config.AllowedForAll) return;
             CCSPlayerController? TargetedPlayer = null;
             float closest = float.MaxValue;
 
@@ -300,7 +296,7 @@ namespace Aimbot
         }
         private void FindClosestPlayer(CCSPlayerController player)
         {
-            if (!AuthorizedCheck(player)) return;
+            if (!AuthorizedCheck(player) && !config.AllowedForAll) return;
             CCSPlayerController? TargetedPlayer = null;
             float closestDistance = float.MaxValue;
 
@@ -322,7 +318,7 @@ namespace Aimbot
         }
         private void ApplyAimbot(CCSPlayerController player, CCSPlayerController TargetedPlayer, byte type = 1)
         {
-            if (!AuthorizedCheck(player)) return;
+            if (!AuthorizedCheck(player) && !config.AllowedForAll) return;
             if (NullCheck([player])) return;
             // Direction from me -> enemy
             var dx = TargetedPlayer.Pawn.Value!.AbsOrigin!.X - player.Pawn.Value!.AbsOrigin!.X;

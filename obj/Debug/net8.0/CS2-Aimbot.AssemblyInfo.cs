@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CS2-Aimbot")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+856b4d1d865ffb76cd0c13460b81cafe5654cf1c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7c1f2fc940f08bbbc437422ced73c2a2fa268709")]
 [assembly: System.Reflection.AssemblyProductAttribute("CS2-Aimbot")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CS2-Aimbot")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
